@@ -74,6 +74,7 @@ import br.ufmg.dcc.labsoft.java.jmove.dependencies.ThrowDependency;
 import br.ufmg.dcc.labsoft.java.jmove.methods.CompilationUnitCacheJmove;
 import br.ufmg.dcc.labsoft.java.jmove.methods.MethodObjects;
 import br.ufmg.dcc.labsoft.java.jmove.suggestion.MethodHasAssigment;
+import br.ufmg.dcc.labsoft.java.jmove.utils.LogSystem;
 
 public class DeepDependencyVisitor extends ASTVisitor {
 	private List<Dependency> dependencies;
@@ -647,6 +648,7 @@ public class DeepDependencyVisitor extends ASTVisitor {
 		} catch (JavaModelException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+			LogSystem.write(e);
 		}
 
 		return fields;

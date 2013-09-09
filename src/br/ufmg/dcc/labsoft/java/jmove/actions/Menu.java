@@ -7,6 +7,8 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkbenchWindowActionDelegate;
 import org.eclipse.ui.PartInitException;
 
+import br.ufmg.dcc.labsoft.java.jmove.utils.LogSystem;
+
 /**
  * Our sample action implements workbench action delegate. The action proxy will
  * be created by the workbench and shown in the UI. When the user tries to use
@@ -39,6 +41,7 @@ public class Menu implements IWorkbenchWindowActionDelegate {
 			}
 		} catch (PartInitException e) {
 			e.printStackTrace();
+			LogSystem.write(e);
 		}
 
 	}

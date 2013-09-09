@@ -21,6 +21,7 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IToolBarManager;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.source.AnnotationModel;
@@ -56,6 +57,7 @@ import org.eclipse.ui.texteditor.ITextEditor;
 import br.ufmg.dcc.labsoft.java.jmove.principal.ChamaRefine;
 import br.ufmg.dcc.labsoft.java.jmove.suggestion.Suggestion;
 import br.ufmg.dcc.labsoft.java.jmove.utils.CandidateMap;
+import br.ufmg.dcc.labsoft.java.jmove.utils.LogSystem;
 
 public class JMoveView extends ViewPart {
 	private TableViewer tableViewer;
@@ -160,7 +162,15 @@ public class JMoveView extends ViewPart {
 		public Object[] getElements(Object parent) {
 
 			if (map != null) {
-				return map.getCandidates();
+				Object[] cand = map.getCandidates();
+				if (cand.length == 0) {// no recommendations
+					MessageDialog.openInformation(getSite()
+							.getWorkbenchWindow().getShell(),
+							"Recommendations not found",
+							"No recommendations were found for this system.");
+					return new CandidateMap[0];
+				} else
+					return cand;
 			} else {
 				return new CandidateMap[0];
 			}
@@ -228,6 +238,7 @@ public class JMoveView extends ViewPart {
 		// APLICANDO REFATORAÇÂO
 		applyRefactoringAction = new Action() {
 			public void run() {
+		
 				IStructuredSelection selection = (IStructuredSelection) tableViewer
 						.getSelection();
 				Suggestion sug = (Suggestion) selection.getFirstElement();
@@ -261,6 +272,7 @@ public class JMoveView extends ViewPart {
 					op.run(getSite().getShell(), titleForFailedChecks);
 				} catch (InterruptedException e) {
 					e.printStackTrace();
+					LogSystem.write(e);
 				}
 				try {
 					IJavaElement targetJavaElement = JavaCore
@@ -271,8 +283,10 @@ public class JMoveView extends ViewPart {
 					JavaUI.openInEditor(sourceJavaElement);
 				} catch (PartInitException e) {
 					e.printStackTrace();
+					LogSystem.write(e);
 				} catch (JavaModelException e) {
 					e.printStackTrace();
+					LogSystem.write(e);
 				}
 
 			}
@@ -328,8 +342,10 @@ public class JMoveView extends ViewPart {
 					sourceEditor.setHighlightRange(offset, length, true);
 				} catch (PartInitException e) {
 					e.printStackTrace();
+					LogSystem.write(e);
 				} catch (JavaModelException e) {
 					e.printStackTrace();
+					LogSystem.write(e);
 				}
 
 			}
@@ -369,6 +385,7 @@ public class JMoveView extends ViewPart {
 				out.close();
 			} catch (IOException e) {
 				e.printStackTrace();
+				LogSystem.write(e);
 			}
 		}
 	}

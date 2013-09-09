@@ -18,6 +18,7 @@ import org.eclipse.jface.text.Position;
 import br.ufmg.dcc.labsoft.java.jmove.methods.CompilationUnitCacheJmove;
 import br.ufmg.dcc.labsoft.java.jmove.methods.MethodObjects;
 import br.ufmg.dcc.labsoft.java.jmove.utils.ClazzUtil;
+import br.ufmg.dcc.labsoft.java.jmove.utils.LogSystem;
 import br.ufmg.dcc.labsoft.java.jmove.utils.RefineSignatures;
 
 public class Suggestion {
@@ -33,24 +34,26 @@ public class Suggestion {
 
 	public String getMethodSignature() {
 		// TODO Auto-generated method stub
-try {
-		IJavaElement parent = iMethod.getParent();
+		try {
+			IJavaElement parent = iMethod.getParent();
 
-		ICompilationUnit unit = iMethod.getCompilationUnit();
-		if(parent.getElementName().equals(unit.getElementName().substring(0,
-						unit.getElementName().length() - 5))){
-			return RefineSignatures.getMethodSignature(
-					ClazzUtil.getUnitClazzName(iMethod.getCompilationUnit()),
-					iMethod);
-		}else
-		
-			return RefineSignatures.getMethodSignature(
-					ClazzUtil.getUnitClazzName(iMethod.getCompilationUnit(), parent.getElementName()),
-					iMethod);
-			
+			ICompilationUnit unit = iMethod.getCompilationUnit();
+			if (parent.getElementName().equals(
+					unit.getElementName().substring(0,
+							unit.getElementName().length() - 5))) {
+				return RefineSignatures.getMethodSignature(ClazzUtil
+						.getUnitClazzName(iMethod.getCompilationUnit()),
+						iMethod);
+			} else
+
+				return RefineSignatures.getMethodSignature(ClazzUtil
+						.getUnitClazzName(iMethod.getCompilationUnit(),
+								parent.getElementName()), iMethod);
+
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+			LogSystem.write(e);
 		}
 		return "Error";
 	}

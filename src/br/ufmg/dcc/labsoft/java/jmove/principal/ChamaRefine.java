@@ -27,6 +27,7 @@ import br.ufmg.dcc.labsoft.java.jmove.methods.Clazz;
 import br.ufmg.dcc.labsoft.java.jmove.util.DCLUtil;
 import br.ufmg.dcc.labsoft.java.jmove.utils.CandidateMap;
 import br.ufmg.dcc.labsoft.java.jmove.utils.InternalClass;
+import br.ufmg.dcc.labsoft.java.jmove.utils.LogSystem;
 
 public class ChamaRefine {
 
@@ -38,13 +39,12 @@ public class ChamaRefine {
 	AllMethods allMethods;
 	String activeProjectName;
 
-
 	public CandidateMap execute(IJavaProject iProject) {
 		try {
 
 			allDeepDependency = new ArrayList<DeepDependencyVisitor>();
 
-			 activeProjectName = iProject.getElementName();
+			activeProjectName = iProject.getElementName();
 
 			project = ResourcesPlugin.getWorkspace().getRoot()
 					.getProject(activeProjectName);
@@ -57,7 +57,8 @@ public class ChamaRefine {
 						throws InvocationTargetException, InterruptedException {
 
 					try {
-						monitor.beginTask("Parsing selected Java Project (1/4)",
+						monitor.beginTask(
+								"Parsing selected Java Project (1/4)",
 								(DCLUtil.getClassNames(project)).size());
 
 						for (String className : DCLUtil.getClassNames(project)) {
@@ -72,7 +73,7 @@ public class ChamaRefine {
 									javaProject, className);
 							ICompilationUnit unit = ((ICompilationUnit) JavaCore
 									.create((IFile) resource));
-							
+
 							DeepDependencyVisitor deepDependency = new DeepDependencyVisitor(
 									unit);
 							allDeepDependency.add(deepDependency);
@@ -90,13 +91,14 @@ public class ChamaRefine {
 					} catch (JavaModelException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
+						LogSystem.write(e);
 					} catch (CoreException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
+						LogSystem.write(e);
 					}
 				}
 			});
-
 
 			wb = PlatformUI.getWorkbench();
 			ps = wb.getProgressService();
@@ -105,35 +107,34 @@ public class ChamaRefine {
 						throws InvocationTargetException, InterruptedException {
 
 					try {
-					 allMethods = new AllMethods(allDeepDependency,monitor);
+						allMethods = new AllMethods(allDeepDependency, monitor);
 					} catch (JavaModelException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
+						LogSystem.write(e);
 					}
 				}
 			});
 
-			
 			wb = PlatformUI.getWorkbench();
 			ps = wb.getProgressService();
 			ps.busyCursorWhile(new IRunnableWithProgress() {
 				public void run(IProgressMonitor monitor)
 						throws InvocationTargetException, InterruptedException {
 
-					
-						CalculateMediaApproach mediaApproach = new CalculateMediaApproach(
-								allMethods, activeProjectName, numberOfClass, monitor);
-						allMethods = null;
-						map = mediaApproach.calculate(CoefficientStrategy.SokalSneath2);
-						
-					
-					
+					CalculateMediaApproach mediaApproach = new CalculateMediaApproach(
+							allMethods, activeProjectName, numberOfClass,
+							monitor);
+					allMethods = null;
+					map = mediaApproach
+							.calculate(CoefficientStrategy.SokalSneath2);
+
 				}
 			});
-			
 
-		} catch (Exception t) {
-			t.printStackTrace();
+		} catch (Exception e) {
+			e.printStackTrace();
+			LogSystem.write(e);
 		}
 
 		return map;

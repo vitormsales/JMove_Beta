@@ -15,7 +15,6 @@ import org.eclipse.ltk.core.refactoring.participants.MoveRefactoring;
 
 public class MoveMethod {
 
-
 	public static List<String> getpossibleRefactoring(IMethod method) {
 
 		List<String> candidatesList = new ArrayList<String>();
@@ -68,6 +67,7 @@ public class MoveMethod {
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+			LogSystem.write(e);
 		}
 		return candidatesList;
 	}
@@ -121,7 +121,7 @@ public class MoveMethod {
 
 			for (int i = 0; i < targets.length; i++) {
 				IVariableBinding candidate = targets[i];
-				
+
 				processor = new MoveInstanceMethodProcessor(method,
 						JavaPreferencesSettings
 								.getCodeGenerationSettings(method
@@ -150,6 +150,7 @@ public class MoveMethod {
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+			LogSystem.write(e);
 			return false;
 		}
 		return false;

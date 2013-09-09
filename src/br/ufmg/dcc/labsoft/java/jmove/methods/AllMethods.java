@@ -26,6 +26,7 @@ import br.ufmg.dcc.labsoft.java.jmove.dependencies.DeclareReturnDependency;
 import br.ufmg.dcc.labsoft.java.jmove.dependencies.Dependency;
 import br.ufmg.dcc.labsoft.java.jmove.dependencies.SimpleNameDependency;
 import br.ufmg.dcc.labsoft.java.jmove.dependencies.ThrowDependency;
+import br.ufmg.dcc.labsoft.java.jmove.utils.LogSystem;
 import br.ufmg.dcc.labsoft.java.jmove.utils.MoveMethod;
 import br.ufmg.dcc.labsoft.java.jmove.utils.RefineSignatures;
 
@@ -68,7 +69,6 @@ public class AllMethods {
 
 					AccessMethodDependency acDependency = (AccessMethodDependency) dep;
 
-					
 					String sourceClass = dep.getClassNameA();
 					String dependecyClass = dep.getClassNameB();
 
@@ -151,7 +151,7 @@ public class AllMethods {
 
 					String sourceClass = dep.getClassNameA();
 					String dependecyClass = dep.getClassNameB();
-					
+
 					String methodA = RefineSignatures.getMethodSignature(
 							dep.getClassNameA(), anDependency.getImethodA());
 
@@ -197,7 +197,7 @@ public class AllMethods {
 
 					List<String> dependeciesList = new ArrayList<String>();
 					dependeciesList.add(dependecyClass);
-					
+
 					putIMethodInMapping(methodA, dpDependency.getImethodA());
 
 					createMethod(methodA, sourceClass, dependeciesList,
@@ -274,7 +274,6 @@ public class AllMethods {
 			}
 		}
 
-
 	}
 
 	private boolean recursive(String sourceClass, String methodA,
@@ -291,7 +290,7 @@ public class AllMethods {
 	private void createMethod(String methodName, String sourceClass,
 			List<String> dependeciesList, IMethod iMethod) {
 		// TODO Auto-generated method stub
-		
+
 		int methodId = AllEntitiesMapping.getInstance().createEntityID(
 				methodName);
 
@@ -307,7 +306,6 @@ public class AllMethods {
 
 		} else {
 
-	
 			if (MoveMethod.IsRefactoringPossible(getIMethod(method2))) {
 				moveIspossible.add(methodId);
 			}
@@ -318,8 +316,6 @@ public class AllMethods {
 		}
 
 	}
-
-	
 
 	private void putIMethodInMapping(String methodName, IMethod iMethod) {
 		// TODO Auto-generated method stub
@@ -395,6 +391,7 @@ public class AllMethods {
 			} catch (JavaModelException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
+				LogSystem.write(e);
 			}
 
 		}

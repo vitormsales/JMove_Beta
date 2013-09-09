@@ -28,6 +28,7 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Shell;
 
 import br.ufmg.dcc.labsoft.java.jmove.dependencies.Dependency;
+import br.ufmg.dcc.labsoft.java.jmove.utils.LogSystem;
 
 public final class DCLUtil {
 	public static final String NOME_APLICACAO = ".: dclsuite :.";
@@ -37,19 +38,19 @@ public final class DCLUtil {
 	private DCLUtil() {
 	}
 
-	
-//	public static boolean isDclEnabled(IProject project) throws CoreException{
-//		ICommand[] commands = project.getDescription().getBuildSpec();
-//		
-//		boolean flag = false;
-//		for (ICommand c : commands) {
-//			if (c.getBuilderName().equals(DCLBuilder.BUILDER_ID)) {
-//				flag = true;
-//			}
-//		}
-//		return flag;
-//	}
-	
+	// public static boolean isDclEnabled(IProject project) throws
+	// CoreException{
+	// ICommand[] commands = project.getDescription().getBuildSpec();
+	//
+	// boolean flag = false;
+	// for (ICommand c : commands) {
+	// if (c.getBuilderName().equals(DCLBuilder.BUILDER_ID)) {
+	// flag = true;
+	// }
+	// }
+	// return flag;
+	// }
+
 	/**
 	 * DCL2 Adjust the name of the class to make the identification easier It is
 	 * done by converting all "/" to "."
@@ -61,9 +62,13 @@ public final class DCLUtil {
 	 * @return Adjusted class name
 	 */
 	public static String adjustClassName(String className) {
-		if (className.startsWith("boolean") || className.startsWith("byte") || className.startsWith("short")
-				|| className.startsWith("long") || className.startsWith("double") || className.startsWith("float")) {
-			return "java.lang." + className.toUpperCase().substring(0, 1) + className.substring(1);
+		if (className.startsWith("boolean") || className.startsWith("byte")
+				|| className.startsWith("short")
+				|| className.startsWith("long")
+				|| className.startsWith("double")
+				|| className.startsWith("float")) {
+			return "java.lang." + className.toUpperCase().substring(0, 1)
+					+ className.substring(1);
 		} else if (className.startsWith("int")) {
 			return "java.lang.Integer";
 		} else if (className.startsWith("int[]")) {
@@ -117,12 +122,14 @@ public final class DCLUtil {
 	 * @return List of class files
 	 * @throws CoreException
 	 */
-	public static Collection<IFile> getAllClassFiles(IFolder folder) throws CoreException {
+	public static Collection<IFile> getAllClassFiles(IFolder folder)
+			throws CoreException {
 		Collection<IFile> projectClassResources = new HashSet<IFile>();
 
 		for (IResource resource : folder.members()) {
 			if (resource.getType() == IResource.FOLDER) {
-				projectClassResources.addAll(getAllClassFiles((IFolder) resource));
+				projectClassResources
+						.addAll(getAllClassFiles((IFolder) resource));
 			} else if (isClassFile(resource)) {
 				projectClassResources.add((IFile) resource);
 			}
@@ -139,47 +146,52 @@ public final class DCLUtil {
 	 * @return List of class files
 	 * @throws CoreException
 	 */
-	public static Collection<IFile> getAllClassFiles(IProject project) throws CoreException {
+	public static Collection<IFile> getAllClassFiles(IProject project)
+			throws CoreException {
 		IJavaProject javaProject = JavaCore.create(project);
 		IPath binDir = javaProject.getOutputLocation();
-		return DCLUtil.getAllClassFiles(project.getFolder(binDir.removeFirstSegments(1)));
+		return DCLUtil.getAllClassFiles(project.getFolder(binDir
+				.removeFirstSegments(1)));
 	}
 
-	public static Collection<String> getClassNames(final IProject project) throws CoreException {
+	public static Collection<String> getClassNames(final IProject project)
+			throws CoreException {
 		final Collection<String> result = new LinkedList<String>();
 		project.accept(new IResourceVisitor() {
 
-			
 			public boolean visit(IResource resource) {
-				
-				if (resource instanceof IFile && resource.getName().endsWith(".java")) {
-					ICompilationUnit unit = ((ICompilationUnit) JavaCore.create((IFile) resource));
+
+				if (resource instanceof IFile
+						&& resource.getName().endsWith(".java")) {
+					ICompilationUnit unit = ((ICompilationUnit) JavaCore
+							.create((IFile) resource));
 					final String className = DCLUtil.getClassName(unit);
 					result.add(className);
 				}
 				return true;
 			}
 		});
-		
+
 		return result;
 	}
 
 	@Deprecated
-	public static Collection<IFile> getJavaClasses(final IProject project) throws CoreException {
+	public static Collection<IFile> getJavaClasses(final IProject project)
+			throws CoreException {
 		final Collection<IFile> result = new LinkedList<IFile>();
 		project.accept(new IResourceVisitor() {
 
-			
 			public boolean visit(IResource resource) {
-				if (resource instanceof IFile && resource.getName().endsWith(".java")) {
-					result.add((IFile)resource);
+				if (resource instanceof IFile
+						&& resource.getName().endsWith(".java")) {
+					result.add((IFile) resource);
 				}
 				return true;
 			}
 		});
 		return result;
 	}
-	
+
 	/**
 	 * DCL2 The method returns the respective IFile of a java source file
 	 * 
@@ -192,17 +204,24 @@ public final class DCLUtil {
 	 * @return Class IFile resource
 	 * @throws JavaModelException
 	 */
-	public static IFile getFileFromClassName(IJavaProject javaProject, final String className) throws JavaModelException {
-		for (IPackageFragmentRoot folder : javaProject.getAllPackageFragmentRoots()) {
+	public static IFile getFileFromClassName(IJavaProject javaProject,
+			final String className) throws JavaModelException {
+		for (IPackageFragmentRoot folder : javaProject
+				.getAllPackageFragmentRoots()) {
 			if (folder.getKind() == IPackageFragmentRoot.K_SOURCE) {
 				IPath path = folder.getPath();
 				path = path.removeFirstSegments(1);
 
 				/* If was internal class, consider the parent class */
-				if ( className.contains("$")) {
-					path = path.append(className.substring(0, className.indexOf('$')).replaceAll("[.]", "" + IPath.SEPARATOR) + ".java");
+				if (className.contains("$")) {
+					path = path.append(className.substring(0,
+							className.indexOf('$')).replaceAll("[.]",
+							"" + IPath.SEPARATOR)
+							+ ".java");
 				} else {
-					path = path.append(className.replaceAll("[.]", "" + IPath.SEPARATOR) + ".java");
+					path = path.append(className.replaceAll("[.]", ""
+							+ IPath.SEPARATOR)
+							+ ".java");
 				}
 
 				IFile file = javaProject.getProject().getFile(path);
@@ -215,38 +234,6 @@ public final class DCLUtil {
 		return null;
 	}
 
-	/**
-	 * DCL2 Method responsible to log error
-	 * 
-	 * @param project
-	 *            Project where the error occurs
-	 * @param e
-	 *            Thrown exception
-	 * @throws CoreException
-	 */
-	public static String logError(IProject project, Throwable e) {
-		final IFile dcFile = project.getFile("dclcheck_" + DateUtil.dateToStr(new Date(), "yyyyMMdd-HHmmss") + "_error.log");
-
-		/* Return file name created */
-		StringBuilder str = new StringBuilder();
-		str.append(e.toString() + "\n");
-		if (e.getStackTrace() != null) {
-			for (StackTraceElement ste : e.getStackTrace()) {
-				str.append("\t" + ste.toString() + "\n");
-			}
-		}
-
-		InputStream source = new ByteArrayInputStream(str.toString().getBytes());
-		try {
-			dcFile.create(source, false, null);
-			// IDE.openEditor(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage(),
-			// dcFile);
-		} catch (CoreException e1) {
-			e1.printStackTrace();
-		}
-		return dcFile.getName();
-
-	}
 
 	/**
 	 * DCL2 Returns the module definition from the Java API
@@ -266,7 +253,8 @@ public final class DCLUtil {
 	 */
 	public static boolean isFromJavaAPI(final String className) {
 		for (String javaModulePkg : getJavaModuleDefinition().split(",")) {
-			String prefix = javaModulePkg.substring(0, javaModulePkg.indexOf(".**"));
+			String prefix = javaModulePkg.substring(0,
+					javaModulePkg.indexOf(".**"));
 			if (className.startsWith(prefix)) {
 				return true;
 			}
@@ -274,7 +262,8 @@ public final class DCLUtil {
 		return false;
 	}
 
-	public static String getNumberWithExactDigits(int originalNumber, int numDigits) {
+	public static String getNumberWithExactDigits(int originalNumber,
+			int numDigits) {
 		String s = "" + originalNumber;
 		while (s.length() < numDigits) {
 			s = "0" + s;
@@ -410,7 +399,8 @@ public final class DCLUtil {
 	 * @return List of dependencies
 	 */
 	@Deprecated
-	public static Collection<Dependency> getDependenciesUsingASM(IFile file) throws CoreException, IOException {
+	public static Collection<Dependency> getDependenciesUsingASM(IFile file)
+			throws CoreException, IOException {
 		/*
 		 * final DCLDeepDependencyVisitor cv = new DCLDeepDependencyVisitor();
 		 * final Collection<Dependency> dependencies = new
@@ -439,11 +429,12 @@ public final class DCLUtil {
 	 *            List of classes
 	 * @return List of dependencies
 	 */
-	public static Collection<Dependency> getDependenciesUsingAST(ICompilationUnit unit) throws CoreException, IOException {
+	public static Collection<Dependency> getDependenciesUsingAST(
+			ICompilationUnit unit) throws CoreException, IOException {
 		final Collection<Dependency> dependencies = new LinkedList<Dependency>();
 
-		
-		br.ufmg.dcc.labsoft.java.jmove.ast.DeepDependencyVisitor cv = new br.ufmg.dcc.labsoft.java.jmove.ast.DeepDependencyVisitor(unit);
+		br.ufmg.dcc.labsoft.java.jmove.ast.DeepDependencyVisitor cv = new br.ufmg.dcc.labsoft.java.jmove.ast.DeepDependencyVisitor(
+				unit);
 
 		dependencies.addAll(cv.getDependencies());
 		return dependencies;
@@ -453,8 +444,9 @@ public final class DCLUtil {
 	 * Checks if a specific class is contained in a list of classes, RE or
 	 * packages
 	 */
-	public static boolean hasClassNameByDescription(final String className, final String moduleDescription,
-			final Map<String, String> modules, final Collection<String> projectClassNames, final IProject project) {
+	public static boolean hasClassNameByDescription(final String className,
+			final String moduleDescription, final Map<String, String> modules,
+			final Collection<String> projectClassNames, final IProject project) {
 		for (String desc : moduleDescription.split(",")) {
 			desc = desc.trim();
 
@@ -468,7 +460,8 @@ public final class DCLUtil {
 				 * If it's a module, call again the same method to return with
 				 * its description
 				 */
-				if (hasClassNameByDescription(className, modules.get(desc), modules, projectClassNames, project)) {
+				if (hasClassNameByDescription(className, modules.get(desc),
+						modules, projectClassNames, project)) {
 					return true;
 				}
 			} else if (desc.endsWith("**")) {
@@ -480,7 +473,8 @@ public final class DCLUtil {
 			} else if (desc.endsWith("*")) {
 				/* If it refers to classes inside one specific package */
 				desc = desc.substring(0, desc.length() - 1);
-				if (className.startsWith(desc) && !className.substring(desc.length()).contains(".")) {
+				if (className.startsWith(desc)
+						&& !className.substring(desc.length()).contains(".")) {
 					return true;
 				}
 			} else if (desc.startsWith("\"") && desc.endsWith("\"")) {
@@ -508,11 +502,14 @@ public final class DCLUtil {
 						strBuilder.deleteCharAt(strBuilder.length() - 1);
 					}
 					modules.put(desc + "+", strBuilder.toString());
-					if (hasClassNameByDescription(className, modules.get(desc + "+"), modules, projectClassNames, project)) {
+					if (hasClassNameByDescription(className,
+							modules.get(desc + "+"), modules,
+							projectClassNames, project)) {
 						return true;
 					}
 				} catch (JavaModelException e) {
 					e.printStackTrace();
+					LogSystem.write(e);
 				}
 			} else {
 				/* If it refers to a specific class */
@@ -551,7 +548,8 @@ public final class DCLUtil {
 	}
 
 	public static String getSimpleClassName(final String qualifiedClassName) {
-		return qualifiedClassName.substring(qualifiedClassName.lastIndexOf(".") + 1);
+		return qualifiedClassName
+				.substring(qualifiedClassName.lastIndexOf(".") + 1);
 	}
 
 }
